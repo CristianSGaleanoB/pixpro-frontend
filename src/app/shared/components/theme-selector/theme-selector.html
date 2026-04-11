@@ -1,0 +1,25 @@
+<div class="dropdown dropdown-end">
+  <div tabindex="0" role="button" class="btn btn-ghost btn-sm gap-2">
+    <svg lucidePalette class="w-4 h-4"></svg>
+    <span class="hidden sm:inline">Theme</span>
+    <svg lucideChevronDown class="w-3 h-3"></svg>
+  </div>
+  <ul
+    tabindex="-1"
+    class="dropdown-content z-50 menu p-2 shadow-lg bg-base-200 rounded-box w-52 max-h-80 overflow-y-auto"
+  >
+    <div class="join join-vertical w-full">
+      @for (t of themes; track t) {
+        <input
+          type="radio"
+          name="theme-buttons"
+          class="btn theme-controller join-item justify-start"
+          [attr.aria-label]="t"
+          [value]="t"
+          [checked]="themeService.theme() === t"
+          (change)="themeService.setTheme(t)"
+        />
+      }
+    </div>
+  </ul>
+</div>

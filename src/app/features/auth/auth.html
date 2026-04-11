@@ -1,0 +1,38 @@
+<div
+  class="flex flex-1 flex-col items-center justify-center px-6 py-16"
+  id="auth-main"
+  role="region"
+  aria-label="Sign in"
+>
+  <div class="w-full max-w-sm card bg-base-100 shadow-sm border border-base-300">
+    <div class="card-body gap-6">
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight">Sign in</h1>
+        <p class="text-sm opacity-70 mt-1">
+          Mock IAM flow. Production will use Keycloak; this page stays the entry after redirect.
+        </p>
+      </div>
+
+      @if (authStore.status() === 'error') {
+        <p class="text-sm text-error" role="alert">Sign-in failed. Try again.</p>
+      }
+
+      <button
+        type="button"
+        class="btn btn-primary min-h-10 w-full"
+        [attr.aria-busy]="authStore.status() === 'loading'"
+        [disabled]="authStore.status() === 'loading'"
+        (click)="signIn()"
+      >
+        @if (authStore.status() === 'loading') {
+          <span class="skeleton h-4 w-40 bg-primary-content/25" aria-hidden="true"></span>
+          <span class="sr-only">Signing in</span>
+        } @else {
+          Continue with mock account
+        }
+      </button>
+
+      <a routerLink="/" class="btn btn-ghost btn-sm w-full">Back to home</a>
+    </div>
+  </div>
+</div>

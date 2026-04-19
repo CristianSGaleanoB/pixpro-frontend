@@ -20,7 +20,7 @@ test_and_lint:
 # Stage 2: Containerize (Build and Docker push)
 build_and_publish_image:
   stage: containers
-  image: docker:24.0.5-alpine
+  image: docker:24.0.5
   services:
     - docker:24.0.5-dind
   variables:

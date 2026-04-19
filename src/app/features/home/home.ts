@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   LucideCloudUpload,
   LucideSparkles,
@@ -7,14 +7,23 @@ import {
   LucideRadio,
   LucideZap,
 } from '@lucide/angular';
+import Keycloak from 'keycloak-js';
 
 @Component({
   selector: 'app-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.html',
-  imports: [RouterLink, LucideCloudUpload, LucideSparkles, LucideBrain, LucideRadio, LucideZap],
+  standalone: true,
+  imports: [LucideCloudUpload, LucideSparkles, LucideBrain, LucideRadio, LucideZap],
   host: {
     class: 'flex min-h-0 flex-1 flex-col',
   },
 })
-export default class HomePage {}
+export default class HomePage {
+  private keycloak = inject(Keycloak);
+  private router = inject(Router);
+
+  login(): void {
+    this.keycloak.login();
+  }
+}

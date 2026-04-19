@@ -1,13 +1,23 @@
 <nav class="navbar shrink-0 border-b border-base-300 bg-base-100 px-6 py-4" aria-label="Primary">
   <div class="flex-1">
-    <a
-      routerLink="/"
-      class="text-2xl font-bold tracking-tight focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
-    >
-      PixPro
-    </a>
+    @if (isLoggedIn()) {
+      <a
+        routerLink="/dashboard"
+        class="text-2xl font-bold tracking-tight focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
+      >
+        PixPro
+      </a>
+    } @else {
+      <a
+        routerLink="/"
+        class="text-2xl font-bold tracking-tight focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
+      >
+        PixPro
+      </a>
+    }
   </div>
   <div class="flex-none">
+    <a routerLink="/dashboard" *kaHasRoles="['user']" checkRole="true">My projects</a>
     <app-theme-selector />
   </div>
 </nav>

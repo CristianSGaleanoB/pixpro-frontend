@@ -15,6 +15,6 @@ export default class AuthPage {
   readonly authStore = inject(AuthStore);
 
   signIn(): void {
-    this.authStore.login();
+    //this.authStore.login();
   }
 }

@@ -1,10 +1,8 @@
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { catchError, EMPTY, switchMap, tap } from 'rxjs';
 import { AuthState } from '../interfaces/auth';
-import { MockAuthService } from '../services/mock-auth';
+import { AuthGuardData } from 'keycloak-angular';
 
 const initialState: AuthState = {
   user: null,
@@ -22,26 +20,26 @@ export const AuthStore = signalStore(
   withComputed(({ user, token }) => ({
     isAuthenticated: () => user() !== null && token().length > 0,
   })),
-  withMethods((store, remote = inject(MockAuthService), router = inject(Router)) => ({
-    login: rxMethod<void>((trigger$) =>
-      trigger$.pipe(
-        tap(() => patchState(store, { status: 'loading' })),
-        switchMap(() =>
-          remote.login$().pipe(
-            tap({
-              next: ({ user: u, token: t }) => {
-                patchState(store, { user: u, token: t, status: 'authenticated' });
-                void router.navigate(['/dashboard']);
-              },
-            }),
-            catchError(() => {
-              patchState(store, { status: 'error' });
-              return EMPTY;
-            })
-          )
-        )
-      )
-    ),
+  withMethods((store, router = inject(Router)) => ({
+    login(token: AuthGuardData): void {
+      const sub = token.keycloak.tokenParsed?.sub;
+      const email = token.keycloak.tokenParsed?.['email'];
+      const role = token.grantedRoles.realmRoles;
+
+      if (!sub) {
+        throw new Error('Token inválido: sub no existe');
+      }
+
+      patchState(store, {
+        user: {
+          id: sub,
+          email: email,
+          role: role,
+        },
+        token: token.keycloak.token,
+        status: 'authenticated',
+      });
+    },
     logout(): void {
       patchState(store, initialState);
       void router.navigate(['/']);

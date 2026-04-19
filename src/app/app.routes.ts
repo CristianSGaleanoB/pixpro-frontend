@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth';
+import { canActivateAuthRole } from './core/guards/auth';
 import HomePage from './features/home/home';
 import AuthPage from './features/auth/auth';
 
@@ -14,7 +14,8 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
-    canActivate: [authGuard],
+    canActivate: [canActivateAuthRole],
+    data: { role: 'user' },
     loadComponent: () => import('./features/dashboard/dashboard'),
   },
 ];

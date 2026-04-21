@@ -34,7 +34,6 @@ const isAccessAllowed = async (
   }
 
   const router = inject(Router);
-  return router.parseUrl('/forbidden');
+  return router.parseUrl('/');
 };
-
 export const canActivateAuthRole = createAuthGuard<CanActivateFn>(isAccessAllowed);

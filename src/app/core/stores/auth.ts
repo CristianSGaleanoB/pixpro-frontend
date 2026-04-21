@@ -27,7 +27,7 @@ export const AuthStore = signalStore(
       const role = token.grantedRoles.realmRoles;
 
       if (!sub) {
-        throw new Error('Token inválido: sub no existe');
+        throw new Error('Invalid token: sub does not exist');
       }
 
       patchState(store, {

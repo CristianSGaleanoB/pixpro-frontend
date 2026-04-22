@@ -1,14 +1,39 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  CanActivateFn,
+  Router,
+  RouterStateSnapshot,
+  UrlTree,
+} from '@angular/router';
 import { AuthStore } from '../stores/auth';
+import { AuthGuardData, createAuthGuard } from 'keycloak-angular';
 
-export const authGuard: CanActivateFn = () => {
+const isAccessAllowed = async (
+  route: ActivatedRouteSnapshot,
+  _: RouterStateSnapshot,
+  authData: AuthGuardData
+): Promise<boolean | UrlTree> => {
   const authStore = inject(AuthStore);
-  const router = inject(Router);
+  const { authenticated, grantedRoles } = authData;
 
-  if (authStore.isAuthenticated()) {
+  const requiredRole = route.data['role'];
+
+  if (!requiredRole) {
+    return false;
+  }
+
+  console.log(authData);
+
+  const hasRequiredRole = (role: string): boolean =>
+    Object.values(grantedRoles.realmRoles).some((roles) => roles.includes(role));
+
+  if (authenticated && hasRequiredRole(requiredRole)) {
+    authStore.login(authData);
     return true;
   }
 
-  return router.parseUrl('/auth');
+  const router = inject(Router);
+  return router.parseUrl('/');
 };
+export const canActivateAuthRole = createAuthGuard<CanActivateFn>(isAccessAllowed);

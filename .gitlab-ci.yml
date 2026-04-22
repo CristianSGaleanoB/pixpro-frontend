@@ -1,0 +1,35 @@
+stages:
+  - check
+  - containers
+
+variables:
+  DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE/frontend
+  DOCKER_TAG: 1.0.$CI_PIPELINE_IID
+
+# Stage 1: Check
+test_and_lint:
+  stage: check
+  image: node:22-alpine
+  before_script:
+    - corepack enable pnpm
+    - pnpm install --frozen-lockfile
+  script:
+    - echo "Executing code review (Linter)..."
+    - pnpm run lint
+
+# Stage 2: Containerize
+build_and_publish_image:
+  stage: containers
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - echo "Building Docker image..."
+    - docker build -t $DOCKER_IMAGE_NAME:$DOCKER_TAG .
+
+    - echo "Pushing image..."
+    - docker push $DOCKER_IMAGE_NAME:$DOCKER_TAG

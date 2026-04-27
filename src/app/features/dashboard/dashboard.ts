@@ -35,7 +35,9 @@ export default class DashboardPage {
   }
 
   confirmDelete(project: Project): void {
-    if (confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)) {
+    if (
+      confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)
+    ) {
       this.projectStore.delete(project._id);
     }
   }

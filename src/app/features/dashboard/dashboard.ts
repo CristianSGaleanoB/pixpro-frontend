@@ -2,6 +2,7 @@ import { afterNextRender, ChangeDetectionStrategy, Component, inject } from '@an
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../core/stores/auth';
 import { ProjectStore } from '../../core/stores/project';
+import { Project } from '../../core/interfaces/project';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,5 +32,15 @@ export default class DashboardPage {
 
   retryLoad(): void {
     this.projectStore.load();
+  }
+
+  confirmDelete(project: Project): void {
+    if (confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)) {
+      this.projectStore.delete(project._id);
+    }
+  }
+
+  openProject(project: Project): void {
+    console.log('Navigate to project:', project._id, project.name);
   }
 }

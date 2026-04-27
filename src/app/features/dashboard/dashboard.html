@@ -4,7 +4,7 @@
 >
   <div class="mb-8">
     <h1 id="dashboard-heading" class="text-3xl font-semibold tracking-tight">Projects</h1>
-    <p class="text-sm opacity-70 mt-1">Your workspaces. Data loads from a mock API today.</p>
+    <p class="text-sm opacity-70 mt-1">Manage and organize your project workspaces.</p>
   </div>
 
   @if (projectStore.isLoading()) {
@@ -33,19 +33,45 @@
     <p class="text-sm opacity-70">No projects yet.</p>
   } @else if (projectStore.hasProjects()) {
     <ul class="grid gap-4 sm:grid-cols-2" role="list">
-      @for (project of projectStore.projects(); track project.id) {
+      @for (project of projectStore.projects(); track project._id) {
         <li>
-          <article
-            class="card bg-base-100 border border-base-300 shadow-sm h-full hover:border-primary cursor-pointer transition-colors"
-            [routerLink]="['/dashboard/projects', project.id]"
+          <button
+            class="card bg-base-100 border border-base-300 shadow-sm h-full transition-all duration-200 hover:border-primary hover:shadow-md cursor-pointer"
+            (click)="openProject(project)"
           >
             <div class="card-body p-5 gap-1">
-              <h2 class="card-title text-base font-medium">{{ project.name }}</h2>
-              @if (project.description) {
-                <p class="text-sm opacity-70">{{ project.description }}</p>
+              <h2 class="card-title text-base font-medium flex items-center justify-between">
+                {{ project.name }}
+                <button
+                  type="button"
+                  class="btn btn-sm btn-ghost btn-square"
+                  (click)="confirmDelete(project)"
+                  aria-label="Delete project"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    class="fill-current transition-colors hover:fill-red-500"
+                  >
+                    <path
+                      d="M7 4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2h4a1 1 0 1 1 0 2h-1.069l-.867 12.142A2 2 0 0 1 17.069 22H6.93a2 2 0 0 1-1.995-1.858L4.07 8H3a1 1 0 0 1 0-2h4zm2 2h6V4H9zM6.074 8l.857 12H17.07l.857-12zM10 10a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1m4 0a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1"
+                    />
+                  </svg>
+                </button>
+              </h2>
+              @if (project.tags && project.tags.length > 0) {
+                <div class="flex flex-wrap gap-1.5 mt-1">
+                  @for (tag of project.tags; track tag) {
+                    <span class="badge badge-sm badge-outline">{{ tag }}</span>
+                  }
+                </div>
+              } @else {
+                <p class="text-xs opacity-40 mt-1">No tags</p>
               }
             </div>
-          </article>
+          </button>
         </li>
       }
     </ul>

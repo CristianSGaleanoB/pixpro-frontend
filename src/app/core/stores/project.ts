@@ -11,6 +11,7 @@ export const ProjectStore = signalStore(
     projects: [] as Project[],
     loadStatus: 'idle' as LoadStatus,
     errorMessage: null as string | null,
+    deletingId: null as string | null,
   }),
   withComputed(({ projects, loadStatus, errorMessage }) => ({
     isLoading: () => loadStatus() === 'loading',
@@ -34,6 +35,26 @@ export const ProjectStore = signalStore(
                 loadStatus: 'error',
                 errorMessage: error.message || 'Failed to load projects',
               });
+              return EMPTY;
+            })
+          )
+        )
+      )
+    ),
+    delete: rxMethod<string>((projectId$) =>
+      projectId$.pipe(
+        tap((id) => patchState(store, { deletingId: id })),
+        switchMap((id) =>
+          api.deleteProject(id).pipe(
+            tap({
+              next: () => {
+                const projects = store.projects().filter((p) => p._id !== id);
+                patchState(store, { projects, deletingId: null });
+              },
+              error: () => patchState(store, { deletingId: null }),
+            }),
+            catchError(() => {
+              patchState(store, { deletingId: null });
               return EMPTY;
             })
           )

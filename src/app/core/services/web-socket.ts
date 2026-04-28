@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { filter, Observable, Subject } from 'rxjs';
+import { filter, Observable, Subject, timer, takeWhile } from 'rxjs';
 import { WorkerMessage } from '../interfaces/worker-message';
 
 @Injectable({
@@ -7,7 +7,11 @@ import { WorkerMessage } from '../interfaces/worker-message';
 })
 export class WebSocketService {
   private ws: WebSocket | null = null;
-  private messageSubject = new Subject<WorkerMessage>();
+  private readonly messageSubject = new Subject<WorkerMessage>();
+  private readonly connectionStatus$ = new Subject<'connected' | 'disconnected'>();
+
+  readonly status$: Observable<'connected' | 'disconnected'> =
+    this.connectionStatus$.asObservable();
 
   connect(url: string): void {
     if (this.ws) {
@@ -16,47 +20,36 @@ export class WebSocketService {
     }
 
     console.log('[WebSocketService] Connecting to', url);
-    try {
-      /**
-       * REAL INTEGRATION POINT:
-       * Initialize the native WebSocket connection using the provided URL.
-       * Once the Backend/Worker is ready, this will be the primary entry point for real-time messages.
-       */
-      this.ws = new WebSocket(url);
 
-      this.ws.onopen = () => {
-        console.log('[WebSocketService] Real WebSocket connection opened.');
-      };
+    const ws = new WebSocket(url);
 
-      /**
-       * MESSAGE HANDLER:
-       * Listen for incoming binary or text messages from the Worker.
-       * The messages are validated and parsed into the WorkerMessage format before being emitted.
-       */
-      this.ws.onmessage = (event: MessageEvent) => {
-        try {
-          const data: WorkerMessage = JSON.parse(event.data);
-          /**
-           * Broadcast the parsed message to the internal Subject.
-           * All active subscribers (e.g., the ImageStore) will react to these updates in real-time.
-           */
-          this.messageSubject.next(data);
-        } catch (e) {
-          console.error('[WebSocketService] Error parsing WebSocket message', e);
-        }
-      };
+    ws.onopen = () => {
+      console.log('[WebSocketService] Connected.');
+      this.connectionStatus$.next('connected');
+    };
 
-      this.ws.onerror = (error) => {
-        console.error('[WebSocketService] WebSocket Error:', error);
-      };
+    ws.onmessage = (event: MessageEvent) => {
+      try {
+        const data: WorkerMessage = JSON.parse(event.data);
+        this.messageSubject.next(data);
+      } catch (e) {
+        console.error('[WebSocketService] Error parsing message', e);
+      }
+    };
 
-      this.ws.onclose = (event) => {
-        console.log('[WebSocketService] WebSocket connection closed.', event.reason);
-        this.ws = null;
-      };
-    } catch (error) {
-      console.error('[WebSocketService] Failed to establish WebSocket connection', error);
-    }
+    ws.onerror = (error) => {
+      console.error('[WebSocketService] Error:', error);
+      this.connectionStatus$.next('disconnected');
+    };
+
+    ws.onclose = () => {
+      console.log('[WebSocketService] Disconnected.');
+      this.ws = null;
+      this.connectionStatus$.next('disconnected');
+      timer(3000).subscribe(() => this.connect(url));
+    };
+
+    this.ws = ws;
   }
 
   disconnect(): void {
@@ -67,16 +60,13 @@ export class WebSocketService {
     }
   }
 
-  subscribe(taskId: string): Observable<WorkerMessage> {
-    return this.messageSubject.asObservable().pipe(filter((msg) => msg.taskId === taskId));
+  getTaskUpdates(taskId: string): Observable<WorkerMessage> {
+    return this.messageSubject.asObservable().pipe(
+      filter((msg) => msg.taskId === taskId),
+      takeWhile((msg) => msg.status !== 'complete' && msg.status !== 'failed', true)
+    );
   }
 
-  /**
-   * MOCK SIMULATOR:
-   * This method artificially simulates the processing lifecycle of an image (0% -> 100% -> Complete).
-   * It is intended for frontend development only and should be replaced by real server-side events
-   * in the next sprint once the Python Digester Worker is fully integrated.
-   */
   simulateWorkerProcessing(taskId: string): void {
     setTimeout(() => {
       this.messageSubject.next({ taskId, status: 'processing', progress: 25 });
@@ -95,7 +85,7 @@ export class WebSocketService {
         taskId,
         status: 'complete',
         progress: 100,
-        imageUrl: `https://picsum.photos/seed/${taskId}/800/600`, // Mock CDN image
+        imageUrl: `https://picsum.photos/seed/${taskId}/800/600`,
       });
     }, 5000);
   }

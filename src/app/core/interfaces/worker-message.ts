@@ -1,4 +1,4 @@
-export type WorkerStatus = 'processing' | 'complete' | 'error';
+export type WorkerStatus = 'processing' | 'complete' | 'error' | 'failed';
 
 export interface WorkerMessage {
   taskId: string;

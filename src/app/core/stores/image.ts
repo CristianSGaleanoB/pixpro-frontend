@@ -3,8 +3,8 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, EMPTY, mergeMap, switchMap, tap, pipe } from 'rxjs';
 import { ImageStatus, ProjectImage } from '../interfaces/image';
-import { ImageApiService } from '../services/image-api.service';
-import { WebSocketService } from '../services/web-socket.service';
+import { ImageApiService } from '../services/image-api';
+import { WebSocketService } from '../services/web-socket';
 import { toast } from 'ngx-sonner';
 
 export interface ImageState {

@@ -1,7 +1,7 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toast } from 'ngx-sonner';
-import { ImageStore } from '../../../core/stores/image.store';
+import { ImageStore } from '../../../core/stores/image';
 import { ProjectStore } from '../../../core/stores/project';
 
 @Component({

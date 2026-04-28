@@ -13,4 +13,10 @@ export const routes: Routes = [
     data: { role: 'user' },
     loadComponent: () => import('./features/dashboard/dashboard'),
   },
+  {
+    path: 'dashboard/projects/:id',
+    canActivate: [canActivateAuthRole],
+    data: { role: 'user' },
+    loadComponent: () => import('./features/dashboard/project-detail/project-detail'),
+  },
 ];

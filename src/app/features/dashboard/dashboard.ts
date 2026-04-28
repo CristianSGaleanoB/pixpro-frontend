@@ -1,4 +1,5 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../core/stores/auth';
 import { ProjectStore } from '../../core/stores/project';
 
@@ -9,6 +10,7 @@ import { ProjectStore } from '../../core/stores/project';
   host: {
     class: 'flex min-h-0 flex-1 flex-col',
   },
+  imports: [RouterLink],
 })
 export default class DashboardPage {
   readonly authStore = inject(AuthStore);

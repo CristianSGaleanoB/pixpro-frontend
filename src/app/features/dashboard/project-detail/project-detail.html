@@ -4,20 +4,7 @@
 >
   <div class="mb-8 flex items-center gap-4">
     <a routerLink="/dashboard" class="btn btn-sm btn-circle btn-ghost">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        class="w-5 h-5"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
-        />
-      </svg>
+      <svg lucideArrowLeft class="w-5 h-5"></svg>
     </a>
     <div>
       <h1 id="project-detail-heading" class="text-3xl font-semibold tracking-tight">
@@ -37,20 +24,7 @@
     (dragover)="onDragOver($event)"
     (drop)="onDrop($event)"
   >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1.5"
-      stroke="currentColor"
-      class="w-12 h-12 opacity-50 mb-4"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"
-      />
-    </svg>
+    <svg lucideCloudUpload class="w-12 h-12 opacity-50 mb-4"></svg>
     <h3 class="font-medium text-lg mb-1">Click or drag images to upload</h3>
     <p class="text-sm opacity-70">Supported formats: JPG, PNG, WEBP</p>
     <input
@@ -90,20 +64,7 @@
                 />
               } @else {
                 <div class="flex items-center justify-center w-full h-full text-base-content/30">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="w-12 h-12"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-                    />
-                  </svg>
+                  <svg lucideImage class="w-12 h-12"></svg>
                 </div>
               }
 

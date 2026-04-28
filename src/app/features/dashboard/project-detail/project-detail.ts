@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toast } from 'ngx-sonner';
 import { ImageStore } from '../../../core/stores/image';
 import { ProjectStore } from '../../../core/stores/project';
+import { LucideArrowLeft, LucideCloudUpload, LucideImage } from '@lucide/angular';
 
 @Component({
   selector: 'app-project-detail',
@@ -11,7 +12,7 @@ import { ProjectStore } from '../../../core/stores/project';
   host: {
     class: 'flex min-h-0 flex-1 flex-col',
   },
-  imports: [RouterLink],
+  imports: [RouterLink, LucideArrowLeft, LucideCloudUpload, LucideImage],
 })
 export default class ProjectDetailComponent {
   private readonly route = inject(ActivatedRoute);

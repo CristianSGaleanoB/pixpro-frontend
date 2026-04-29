@@ -37,7 +37,7 @@
         <li>
           <button
             class="card bg-base-100 border border-base-300 shadow-sm h-full transition-all duration-200 hover:border-primary hover:shadow-md cursor-pointer"
-            (click)="openProject(project)"
+            [routerLink]="['/dashboard/projects', project._id]"
           >
             <div class="card-body p-5 gap-1">
               <h2 class="card-title text-base font-medium flex items-center justify-between">

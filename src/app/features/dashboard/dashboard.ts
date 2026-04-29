@@ -41,8 +41,4 @@ export default class DashboardPage {
       this.projectStore.delete(project._id);
     }
   }
-
-  openProject(project: Project): void {
-    console.log('Navigate to project:', project._id, project.name);
-  }
 }

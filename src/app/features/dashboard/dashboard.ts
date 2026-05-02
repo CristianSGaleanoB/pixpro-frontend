@@ -41,4 +41,9 @@ export default class DashboardPage {
       this.projectStore.delete(project._id);
     }
   }
+
+  createProject(): void {
+    const name = document.getElementById('project_name') as HTMLInputElement;
+    this.projectStore.create(name.value);
+  }
 }

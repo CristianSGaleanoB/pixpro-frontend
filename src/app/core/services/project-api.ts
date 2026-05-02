@@ -11,14 +11,14 @@ export class ProjectApiService {
   private readonly authStore = inject(AuthStore);
 
   getProjects(): Observable<Project[]> {
-    const userId = this.authStore.user()?.id;
-    if (!userId) {
-      throw new Error('User ID not available');
-    }
-    return this.http.get<Project[]>(`${environment.apiUrl}/projects/user/${userId}`);
+    return this.http.get<Project[]>(`${environment.apiUrl}/projects/`);
   }
 
   deleteProject(projectId: string): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}/projects/${projectId}`);
+  }
+
+  createProject(projectName: string): Observable<Project> {
+    return this.http.post<Project>(`${environment.apiUrl}/projects/`, { name: projectName });
   }
 }

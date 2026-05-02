@@ -61,5 +61,21 @@ export const ProjectStore = signalStore(
         )
       )
     ),
+    create: rxMethod<string>((projectName$) =>
+      projectName$.pipe(
+        switchMap((name) =>
+          api.createProject(name).pipe(
+            tap({
+              next: (project) => {
+                const projects = store.projects().concat(project);
+                patchState(store, { projects });
+              },
+              error: () => {},
+            }),
+            catchError(() => EMPTY)
+          )
+        )
+      )
+    ),
   }))
 );

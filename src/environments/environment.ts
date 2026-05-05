@@ -6,5 +6,5 @@ export const environment = {
     realmName: 'pixpro-realm',
     clientId: 'pixpro-frontend-client',
   },
-  workerUrl: 'ws://localhost:3001/ws',
+  workerUrl: 'ws://localhost:8765',
 };

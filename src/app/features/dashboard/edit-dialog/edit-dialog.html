@@ -1,0 +1,54 @@
+<button class="btn btn-sm btn-ghost btn-square hover:bg-[#605dff80]" (click)="openModal()">
+  <svg lucidePencil [size]="16"></svg>
+</button>
+
+<dialog id="{{ project._id }}-edit-modal" class="modal">
+  <div class="modal-box">
+    <h3 class="text-lg font-bold mb-6">Edit project</h3>
+    <form class="flex flex-col gap-6" [formGroup]="form">
+      <!-- NAME -->
+      <input
+        type="text"
+        formControlName="name"
+        class="input input-bordered w-full"
+        placeholder="Project Name"
+      />
+
+      <!-- TAGS INPUT -->
+      <div class="flex gap-4">
+        <input
+          type="text"
+          class="input input-bordered w-full"
+          placeholder="Add tags"
+          [ngModel]="newTag"
+          (ngModelChange)="newTag = $event"
+          [ngModelOptions]="{ standalone: true }"
+          (keyup.enter)="addTag()"
+        />
+        <button type="button" class="btn btn-secondary" (click)="addTag()">add</button>
+      </div>
+
+      <!-- TAGS LIST -->
+      @if (tags.length > 0) {
+        <div class="flex flex-wrap gap-2">
+          @for (tag of tags.controls; track tag; let i = $index) {
+            <span class="badge badge-outline badge-primary flex items-center gap-1">
+              {{ tag.value }}
+              <button type="button" class="btn btn-xs btn-ghost btn-square" (click)="removeTag(i)">
+                <svg lucideX [size]="12"></svg>
+              </button>
+            </span>
+          }
+        </div>
+      } @else {
+        <p class="text-sm text-gray-500">No tags added yet.</p>
+      }
+
+      <!-- ACTIONS -->
+      <div class="flex gap-2 justify-end">
+        <button type="button" class="btn btn-md btn-ghost" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn bg-primary" (click)="onConfirm()">Confirm</button>
+      </div>
+    </form>
+  </div>
+</dialog>

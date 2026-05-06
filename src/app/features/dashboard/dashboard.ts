@@ -2,7 +2,9 @@ import { afterNextRender, ChangeDetectionStrategy, Component, inject } from '@an
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../core/stores/auth';
 import { ProjectStore } from '../../core/stores/project';
-import { Project } from '../../core/interfaces/project';
+import { EditDialog } from './edit-dialog/edit-dialog';
+import { LucideRefreshCcw } from '@lucide/angular';
+import { DeleteDialog } from './delete-dialog/delete-dialog';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,7 +13,7 @@ import { Project } from '../../core/interfaces/project';
   host: {
     class: 'flex min-h-0 flex-1 flex-col',
   },
-  imports: [RouterLink],
+  imports: [RouterLink, EditDialog, DeleteDialog, LucideRefreshCcw],
 })
 export default class DashboardPage {
   readonly authStore = inject(AuthStore);
@@ -34,16 +36,9 @@ export default class DashboardPage {
     this.projectStore.load();
   }
 
-  confirmDelete(project: Project): void {
-    if (
-      confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)
-    ) {
-      this.projectStore.delete(project._id);
-    }
-  }
-
   createProject(): void {
     const name = document.getElementById('project_name') as HTMLInputElement;
     this.projectStore.create(name.value);
+    name.value = '';
   }
 }

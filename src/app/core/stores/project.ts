@@ -4,6 +4,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, EMPTY, switchMap, tap } from 'rxjs';
 import { LoadStatus, Project } from '../interfaces/project';
 import { ProjectApiService } from '../services/project-api';
+import { UpdateProject } from '../interfaces/update-project';
 
 export const ProjectStore = signalStore(
   { providedIn: 'root' },
@@ -51,7 +52,10 @@ export const ProjectStore = signalStore(
                 const projects = store.projects().filter((p) => p._id !== id);
                 patchState(store, { projects, deletingId: null });
               },
-              error: () => patchState(store, { deletingId: null }),
+              error: (err) => {
+                console.error('delete error:', err);
+                patchState(store, { deletingId: null });
+              },
             }),
             catchError(() => {
               patchState(store, { deletingId: null });
@@ -70,7 +74,24 @@ export const ProjectStore = signalStore(
                 const projects = store.projects().concat(project);
                 patchState(store, { projects });
               },
-              error: () => {},
+              error: (err) => {
+                console.error('delete error:', err);
+              },
+            }),
+            catchError(() => EMPTY)
+          )
+        )
+      )
+    ),
+    edit: rxMethod<{ id: string; info: UpdateProject }>((payload$) =>
+      payload$.pipe(
+        switchMap(({ id, info }) =>
+          api.editProject(id, info).pipe(
+            tap({
+              next: (updatedProject) => {
+                const projects = store.projects().map((p) => (p._id === id ? updatedProject : p));
+                patchState(store, { projects });
+              },
             }),
             catchError(() => EMPTY)
           )

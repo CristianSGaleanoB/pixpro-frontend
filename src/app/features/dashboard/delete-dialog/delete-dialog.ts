@@ -32,8 +32,6 @@ export class DeleteDialog {
 
   onConfirm(): void {
     this.projectStore.delete(this.project._id);
-    // console.log(this.projectStore.projects());
-    // this.projectStore.load();
     this.closeModal();
   }
 }

@@ -1,7 +1,12 @@
 export interface Project {
-  id: string;
+  _id: string;
   name: string;
-  description?: string;
+  ownerId: string;
+  tags: string[];
+  totalImages: number;
+  processedImages: number;
+  status: 'active' | 'processing' | 'completed';
+  isPublic: boolean;
 }
 
 export type LoadStatus = 'idle' | 'loading' | 'success' | 'error';

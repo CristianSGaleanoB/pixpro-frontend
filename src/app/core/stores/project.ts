@@ -4,6 +4,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, EMPTY, switchMap, tap } from 'rxjs';
 import { LoadStatus, Project } from '../interfaces/project';
 import { ProjectApiService } from '../services/project-api';
+import { UpdateProject } from '../interfaces/update-project';
 
 export const ProjectStore = signalStore(
   { providedIn: 'root' },
@@ -11,6 +12,7 @@ export const ProjectStore = signalStore(
     projects: [] as Project[],
     loadStatus: 'idle' as LoadStatus,
     errorMessage: null as string | null,
+    deletingId: null as string | null,
   }),
   withComputed(({ projects, loadStatus, errorMessage }) => ({
     isLoading: () => loadStatus() === 'loading',
@@ -36,6 +38,62 @@ export const ProjectStore = signalStore(
               });
               return EMPTY;
             })
+          )
+        )
+      )
+    ),
+    delete: rxMethod<string>((projectId$) =>
+      projectId$.pipe(
+        tap((id) => patchState(store, { deletingId: id })),
+        switchMap((id) =>
+          api.deleteProject(id).pipe(
+            tap({
+              next: () => {
+                const projects = store.projects().filter((p) => p._id !== id);
+                patchState(store, { projects, deletingId: null });
+              },
+              error: (err) => {
+                console.error('delete error:', err);
+                patchState(store, { deletingId: null });
+              },
+            }),
+            catchError(() => {
+              patchState(store, { deletingId: null });
+              return EMPTY;
+            })
+          )
+        )
+      )
+    ),
+    create: rxMethod<string>((projectName$) =>
+      projectName$.pipe(
+        switchMap((name) =>
+          api.createProject(name).pipe(
+            tap({
+              next: (project) => {
+                const projects = store.projects().concat(project);
+                patchState(store, { projects });
+              },
+              error: (err) => {
+                console.error('delete error:', err);
+              },
+            }),
+            catchError(() => EMPTY)
+          )
+        )
+      )
+    ),
+    edit: rxMethod<{ id: string; info: UpdateProject }>((payload$) =>
+      payload$.pipe(
+        switchMap(({ id, info }) =>
+          api.editProject(id, info).pipe(
+            tap({
+              next: (updatedProject) => {
+                const projects = store.projects().map((p) => (p._id === id ? updatedProject : p));
+                patchState(store, { projects });
+              },
+            }),
+            catchError(() => EMPTY)
           )
         )
       )

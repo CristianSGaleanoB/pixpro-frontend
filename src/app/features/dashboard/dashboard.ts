@@ -2,6 +2,8 @@ import { afterNextRender, ChangeDetectionStrategy, Component, inject } from '@an
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../core/stores/auth';
 import { ProjectStore } from '../../core/stores/project';
+import { EditDialog } from './edit-dialog/edit-dialog';
+import { DeleteDialog } from './delete-dialog/delete-dialog';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,7 +12,7 @@ import { ProjectStore } from '../../core/stores/project';
   host: {
     class: 'flex min-h-0 flex-1 flex-col',
   },
-  imports: [RouterLink],
+  imports: [RouterLink, EditDialog, DeleteDialog],
 })
 export default class DashboardPage {
   readonly authStore = inject(AuthStore);
@@ -31,5 +33,11 @@ export default class DashboardPage {
 
   retryLoad(): void {
     this.projectStore.load();
+  }
+
+  createProject(): void {
+    const name = document.getElementById('project_name') as HTMLInputElement;
+    this.projectStore.create(name.value);
+    name.value = '';
   }
 }

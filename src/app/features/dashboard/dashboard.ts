@@ -3,7 +3,6 @@ import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../core/stores/auth';
 import { ProjectStore } from '../../core/stores/project';
 import { EditDialog } from './edit-dialog/edit-dialog';
-import { LucideRefreshCcw } from '@lucide/angular';
 import { DeleteDialog } from './delete-dialog/delete-dialog';
 
 @Component({
@@ -13,7 +12,7 @@ import { DeleteDialog } from './delete-dialog/delete-dialog';
   host: {
     class: 'flex min-h-0 flex-1 flex-col',
   },
-  imports: [RouterLink, EditDialog, DeleteDialog, LucideRefreshCcw],
+  imports: [RouterLink, EditDialog, DeleteDialog],
 })
 export default class DashboardPage {
   readonly authStore = inject(AuthStore);

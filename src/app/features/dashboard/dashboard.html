@@ -35,7 +35,10 @@
     <ul class="grid gap-4 sm:grid-cols-2" role="list">
       @for (project of projectStore.projects(); track project.id) {
         <li>
-          <article class="card bg-base-100 border border-base-300 shadow-sm h-full">
+          <article
+            class="card bg-base-100 border border-base-300 shadow-sm h-full hover:border-primary cursor-pointer transition-colors"
+            [routerLink]="['/dashboard/projects', project.id]"
+          >
             <div class="card-body p-5 gap-1">
               <h2 class="card-title text-base font-medium">{{ project.name }}</h2>
               @if (project.description) {

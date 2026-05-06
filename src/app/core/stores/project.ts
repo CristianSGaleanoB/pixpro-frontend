@@ -5,33 +5,35 @@ import { catchError, EMPTY, switchMap, tap } from 'rxjs';
 import { LoadStatus, Project } from '../interfaces/project';
 import { ProjectApiService } from '../services/project-api';
 
-/**
- * Loads projects via REST (ProjectApiService). For live job/image status, subscribe inside
- * an rxMethod (or withHooks) to DigesterSocketService.messages$() and patchState rows — see core/digester.
- */
 export const ProjectStore = signalStore(
   { providedIn: 'root' },
   withState({
     projects: [] as Project[],
     loadStatus: 'idle' as LoadStatus,
+    errorMessage: null as string | null,
   }),
-  withComputed(({ projects, loadStatus }) => ({
+  withComputed(({ projects, loadStatus, errorMessage }) => ({
     isLoading: () => loadStatus() === 'loading',
     hasError: () => loadStatus() === 'error',
     isEmpty: () => loadStatus() === 'success' && projects().length === 0,
     hasProjects: () => loadStatus() === 'success' && projects().length > 0,
+    errorMessage: () => errorMessage(),
   })),
   withMethods((store, api = inject(ProjectApiService)) => ({
     load: rxMethod<void>((trigger$) =>
       trigger$.pipe(
-        tap(() => patchState(store, { loadStatus: 'loading' })),
+        tap(() => patchState(store, { loadStatus: 'loading', errorMessage: null })),
         switchMap(() =>
           api.getProjects().pipe(
             tap({
               next: (projects) => patchState(store, { projects, loadStatus: 'success' }),
             }),
-            catchError(() => {
-              patchState(store, { projects: [], loadStatus: 'error' });
+            catchError((error) => {
+              patchState(store, {
+                projects: [],
+                loadStatus: 'error',
+                errorMessage: error.message || 'Failed to load projects',
+              });
               return EMPTY;
             })
           )

@@ -6,6 +6,7 @@ import { ImageStatus, ProjectImage } from '../interfaces/image';
 import { ImageApiService } from '../services/image-api';
 import { WebSocketService } from '../services/web-socket';
 import { toast } from 'ngx-sonner';
+import { environment } from '../../../environments/environment';
 
 export interface ImageState {
   images: ProjectImage[];
@@ -32,7 +33,10 @@ export const ImageStore = signalStore(
   withMethods((store, api = inject(ImageApiService), ws = inject(WebSocketService)) => ({
     loadImages: rxMethod<string>(
       pipe(
-        tap(() => patchState(store, { loadStatus: 'loading', errorMessage: null })),
+        tap(() => {
+          patchState(store, { loadStatus: 'loading', errorMessage: null });
+          ws.connect(environment.workerUrl);
+        }),
         switchMap((projectId) =>
           api.getImages(projectId).pipe(
             tap({
@@ -60,7 +64,7 @@ export const ImageStore = signalStore(
                 images: [image, ...state.images],
               }));
 
-              ws.simulateWorkerProcessing(taskId);
+              ws.connect(environment.workerUrl);
 
               return ws.getTaskUpdates(taskId).pipe(
                 tap(

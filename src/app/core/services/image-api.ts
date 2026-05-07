@@ -1,5 +1,7 @@
-import { Injectable } from '@angular/core';
-import { delay, Observable, of } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { delay, map, Observable, of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { ProjectImage } from '../interfaces/image';
 
 const MOCK_IMAGES: ProjectImage[] = [
@@ -31,6 +33,8 @@ const MOCK_IMAGES: ProjectImage[] = [
   providedIn: 'root',
 })
 export class ImageApiService {
+  private readonly http = inject(HttpClient);
+
   getImages(projectId: string): Observable<ProjectImage[]> {
     /**
      * MOCK REST API:
@@ -42,23 +46,40 @@ export class ImageApiService {
   }
 
   uploadImage(projectId: string, file: File): Observable<{ taskId: string; image: ProjectImage }> {
-    /**
-     * MOCK UPLOAD PROCESS:
-     * Simulates the initial image metadata registration in the database.
-     * Returns a unique 'taskId' used to track the asynchronous processing status via WebSockets.
-     */
     const taskId = 'task-' + Math.random().toString(36).substring(2, 9);
 
-    const newImage: ProjectImage = {
-      id: taskId,
-      projectId,
-      filename: file.name,
-      sizeBytes: file.size,
-      uploadDate: new Date().toISOString(),
-      status: 'idle',
-      progress: 0,
+    // We send mock data to the backend to fulfill UploadImageDto
+    // The DTO requires a valid UUID for projectId — 'p1' is a mock ID that fails validation.
+    // We use a fixed mock UUID until real project IDs are wired up.
+    const MOCK_PROJECT_UUID = 'b8a1c7c9-5509-4113-a4c3-883a45c366fb';
+    const payload = {
+      projectId: MOCK_PROJECT_UUID,
+      storagePath: 'mock/cdn/path/' + file.name,
+      upscaler: true,
+      grayscale: false,
+      restore: true,
+      watermark: 'PixPro Mock',
     };
 
-    return of({ taskId, image: newImage }).pipe(delay(600));
+    return this.http
+      .post<{
+        message: string;
+        correlationId: string;
+        imageId: string;
+      }>(`${environment.apiUrl}/images/upload`, payload)
+      .pipe(
+        map((response) => {
+          const newImage: ProjectImage = {
+            id: response.imageId || taskId,
+            projectId,
+            filename: file.name,
+            sizeBytes: file.size,
+            uploadDate: new Date().toISOString(),
+            status: 'idle',
+            progress: 0,
+          };
+          return { taskId: response.imageId || taskId, image: newImage };
+        })
+      );
   }
 }

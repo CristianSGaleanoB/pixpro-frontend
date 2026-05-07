@@ -1,62 +1,90 @@
-import { Injectable } from '@angular/core';
-import { filter, Observable, Subject, timer, takeWhile } from 'rxjs';
-import { WorkerMessage } from '../interfaces/worker-message';
+import { Injectable, inject } from '@angular/core';
+import { filter, Observable, Subject, takeWhile } from 'rxjs';
+import { io, Socket } from 'socket.io-client';
+import { AuthStore } from '../stores/auth';
+import { WorkerMessage, WorkerStatus } from '../interfaces/worker-message';
 
 @Injectable({
   providedIn: 'root',
 })
 export class WebSocketService {
-  private ws: WebSocket | null = null;
+  private socket: Socket | null = null;
+  private readonly authStore = inject(AuthStore);
   private readonly messageSubject = new Subject<WorkerMessage>();
   private readonly connectionStatus$ = new Subject<'connected' | 'disconnected'>();
 
   readonly status$: Observable<'connected' | 'disconnected'> =
     this.connectionStatus$.asObservable();
 
-  connect(url: string): void {
-    if (this.ws) {
-      console.warn('[WebSocketService] Already connected.');
+  async connect(url: string): Promise<void> {
+    if (this.socket?.connected) {
       return;
     }
 
-    console.log('[WebSocketService] Connecting to', url);
-
-    const ws = new WebSocket(url);
-
-    ws.onopen = () => {
-      console.log('[WebSocketService] Connected.');
-      this.connectionStatus$.next('connected');
-    };
-
-    ws.onmessage = (event: MessageEvent) => {
-      try {
-        const data: WorkerMessage = JSON.parse(event.data);
-        this.messageSubject.next(data);
-      } catch (e) {
-        console.error('[WebSocketService] Error parsing message', e);
+    try {
+      const token = this.authStore.token();
+      if (!token) {
+        console.warn('[WebSocketService] User is not logged in. Skipping socket connection.');
+        return;
       }
-    };
 
-    ws.onerror = (error) => {
-      console.error('[WebSocketService] Error:', error);
+      console.log('[WebSocketService] Connecting to Socket.IO at', url);
+
+      // Initialize Socket.IO connection with Keycloak token
+      this.socket = io(url, {
+        transports: ['websocket'],
+        auth: { token },
+        query: { token },
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 2000,
+      });
+
+      this.socket.on('connect', () => {
+        console.log('[WebSocketService] Connected to Socket.IO server');
+        this.connectionStatus$.next('connected');
+      });
+
+      this.socket.on('disconnect', () => {
+        console.log('[WebSocketService] Disconnected from Socket.IO server');
+        this.connectionStatus$.next('disconnected');
+      });
+
+      this.socket.on('connect_error', (error) => {
+        console.error('[WebSocketService] Connection Error:', error);
+        this.connectionStatus$.next('disconnected');
+      });
+
+      this.socket.on(
+        'pipeline_status',
+        (data: {
+          image_id: string;
+          status: string;
+          message: string;
+          progress?: number;
+          result_url?: string;
+        }) => {
+          console.log('[WebSocketService] Received pipeline_status:', data);
+          const message: WorkerMessage = {
+            taskId: data.image_id,
+            status: data.status as WorkerStatus,
+            progress: data.progress ?? 0,
+            imageUrl: data.result_url,
+          };
+          this.messageSubject.next(message);
+        }
+      );
+    } catch (error) {
+      console.error('[WebSocketService] Failed to initialize connection:', error);
       this.connectionStatus$.next('disconnected');
-    };
-
-    ws.onclose = () => {
-      console.log('[WebSocketService] Disconnected.');
-      this.ws = null;
-      this.connectionStatus$.next('disconnected');
-      timer(3000).subscribe(() => this.connect(url));
-    };
-
-    this.ws = ws;
+    }
   }
 
   disconnect(): void {
-    if (this.ws) {
-      console.log('[WebSocketService] Disconnecting...');
-      this.ws.close();
-      this.ws = null;
+    if (this.socket) {
+      console.log('[WebSocketService] Disconnecting Socket.IO...');
+      this.socket.disconnect();
+      this.socket = null;
     }
   }
 
@@ -65,28 +93,5 @@ export class WebSocketService {
       filter((msg) => msg.taskId === taskId),
       takeWhile((msg) => msg.status !== 'complete' && msg.status !== 'failed', true)
     );
-  }
-
-  simulateWorkerProcessing(taskId: string): void {
-    setTimeout(() => {
-      this.messageSubject.next({ taskId, status: 'processing', progress: 25 });
-    }, 1000);
-
-    setTimeout(() => {
-      this.messageSubject.next({ taskId, status: 'processing', progress: 65 });
-    }, 2500);
-
-    setTimeout(() => {
-      this.messageSubject.next({ taskId, status: 'processing', progress: 100 });
-    }, 4000);
-
-    setTimeout(() => {
-      this.messageSubject.next({
-        taskId,
-        status: 'complete',
-        progress: 100,
-        imageUrl: `https://picsum.photos/seed/${taskId}/800/600`,
-      });
-    }, 5000);
   }
 }

@@ -1,18 +1,27 @@
-import { Injectable } from '@angular/core';
-import { delay, Observable, of } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Project } from '../interfaces/project';
-
-const MOCK_PROJECTS: Project[] = [
-  { id: 'p1', name: 'Marketing assets', description: 'Banners and social creatives' },
-  { id: 'p2', name: 'Product photos', description: 'E-commerce catalog batch' },
-  { id: 'p3', name: 'Research set', description: 'Microscopy and lab captures' },
-  { id: 'p4', name: 'Archive 2025', description: 'Legacy uploads pending review' },
-];
+import { environment } from '../../../environments/environment';
+import { UpdateProject } from '../interfaces/update-project';
 
 @Injectable({ providedIn: 'root' })
 export class ProjectApiService {
+  private readonly http = inject(HttpClient);
+
   getProjects(): Observable<Project[]> {
-    // TODO: inject HttpClient and return this.http.get<Project[]>(`${environment.apiUrl}/projects`);
-    return of(MOCK_PROJECTS).pipe(delay(280));
+    return this.http.get<Project[]>(`${environment.apiUrl}/projects/`);
+  }
+
+  deleteProject(projectId: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/projects/${projectId}`);
+  }
+
+  createProject(projectName: string): Observable<Project> {
+    return this.http.post<Project>(`${environment.apiUrl}/projects/`, { name: projectName });
+  }
+
+  editProject(projectId: string, info: UpdateProject): Observable<Project> {
+    return this.http.patch<Project>(`${environment.apiUrl}/projects/${projectId}`, info);
   }
 }

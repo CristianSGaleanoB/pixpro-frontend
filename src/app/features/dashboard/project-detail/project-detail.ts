@@ -39,7 +39,7 @@ export default class ProjectDetailComponent {
   }
 
   get currentProject() {
-    return this.projectStore.projects().find((p) => p.id === this.projectId());
+    return this.projectStore.projects().find((p) => p._id === this.projectId());
   }
 
   registerFileInput(el: HTMLInputElement): void {

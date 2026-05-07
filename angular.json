@@ -6,7 +6,7 @@
     "schematicCollections": [
       "angular-eslint"
     ],
-    "analytics": "e9bfec0d-7a0e-44e0-9f0a-7601202e1d88"
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {

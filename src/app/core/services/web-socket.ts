@@ -67,7 +67,7 @@ export class WebSocketService {
           console.log('[WebSocketService] Received pipeline_status:', data);
           const message: WorkerMessage = {
             taskId: data.image_id,
-            status: this.mapStatus(data.status),
+            status: data.status as WorkerStatus,
             progress: data.progress ?? 0,
             imageUrl: data.result_url,
           };
@@ -77,20 +77,6 @@ export class WebSocketService {
     } catch (error) {
       console.error('[WebSocketService] Failed to initialize connection:', error);
       this.connectionStatus$.next('disconnected');
-    }
-  }
-
-  private mapStatus(workerStatus: string): WorkerStatus {
-    switch (workerStatus) {
-      case 'PROCESSING_STARTED':
-      case 'PROCESSING':
-        return 'processing';
-      case 'PROCESSING_COMPLETED':
-        return 'complete';
-      case 'PROCESSING_FAILED':
-        return 'failed';
-      default:
-        return 'processing';
     }
   }
 

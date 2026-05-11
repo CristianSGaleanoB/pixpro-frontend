@@ -46,31 +46,24 @@ export class ImageApiService {
   }
 
   uploadImage(projectId: string, file: File): Observable<{ taskId: string; image: ProjectImage }> {
-    const taskId = 'task-' + Math.random().toString(36).substring(2, 9);
-
-    // We send mock data to the backend to fulfill UploadImageDto
-    // The DTO requires a valid UUID for projectId — 'p1' is a mock ID that fails validation.
-    // We use a fixed mock UUID until real project IDs are wired up.
-    const MOCK_PROJECT_UUID = 'b8a1c7c9-5509-4113-a4c3-883a45c366fb';
-    const payload = {
-      projectId: MOCK_PROJECT_UUID,
-      storagePath: 'mock/cdn/path/' + file.name,
-      upscaler: true,
-      grayscale: false,
-      restore: true,
-      watermark: 'PixPro Mock',
-    };
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('projectId', projectId);
+    formData.append('upscaler', 'true');
+    formData.append('grayscale', 'false');
+    formData.append('restore', 'true');
+    formData.append('watermark', 'PixPro Mock');
 
     return this.http
       .post<{
         message: string;
         correlationId: string;
         imageId: string;
-      }>(`${environment.apiUrl}/images/upload`, payload)
+      }>(`${environment.apiUrl}/images/upload`, formData)
       .pipe(
         map((response) => {
           const newImage: ProjectImage = {
-            id: response.imageId || taskId,
+            id: response.imageId,
             projectId,
             filename: file.name,
             sizeBytes: file.size,
@@ -78,7 +71,7 @@ export class ImageApiService {
             status: 'idle',
             progress: 0,
           };
-          return { taskId: response.imageId || taskId, image: newImage };
+          return { taskId: response.imageId, image: newImage };
         })
       );
   }

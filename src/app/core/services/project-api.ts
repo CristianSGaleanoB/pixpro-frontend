@@ -10,7 +10,7 @@ export class ProjectApiService {
   private readonly http = inject(HttpClient);
 
   getProjects(): Observable<Project[]> {
-    return this.http.get<Project[]>(`${environment.apiUrl}/projects/`);
+    return this.http.get<Project[]>(`${environment.queryApiUrl}/projects/`);
   }
 
   deleteProject(projectId: string): Observable<void> {

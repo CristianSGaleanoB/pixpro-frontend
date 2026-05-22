@@ -1,6 +1,7 @@
 export const environment = {
   production: true,
   apiUrl: 'http://localhost:3000/api',
+  queryApiUrl: 'http://localhost:2000/api',
   keycloak: {
     url: 'http://localhost:8085',
     realmName: 'pixpro-realm',
